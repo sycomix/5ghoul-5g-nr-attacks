@@ -33,11 +33,9 @@ class SPIFlash(object):
         self.flash.PinHigh(GPIOL1)
 
     def _addr2str(self, address):
-        addr_str = ""
-
-        for i in range(0, self.ADDRESS_LENGTH):
-            addr_str += chr((address >> (i*8)) & 0xFF)
-
+        addr_str = "".join(
+            chr((address >> (i * 8)) & 0xFF) for i in range(0, self.ADDRESS_LENGTH)
+        )
         return addr_str[::-1]
 
     def Read(self, count, address=0):

@@ -88,7 +88,7 @@ class RESTServer(object):
         ''' Register external callback (from c++ user code) '''
 
         # connect and disconnect callbacks are only handled in SocketIO
-        if fcn_name == 'connect' or fcn_name == 'disconnect':
+        if fcn_name in ['connect', 'disconnect']:
             return
 
         # Generate callback function entry point (prepare arguments to user fcn)

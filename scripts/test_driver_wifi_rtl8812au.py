@@ -67,11 +67,7 @@ class RT2800USBNetlink:
         if netlink_port is not None:
             self.NETLINK_USER = netlink_port
 
-        if netlink_pid is None:
-            self.NETLINK_PID = os.getpid()
-        else:
-            self.NETLINK_PID = netlink_pid
-
+        self.NETLINK_PID = os.getpid() if netlink_pid is None else netlink_pid
         if netlink_group is not None:
             self.NETLINK_GROUP = netlink_group
 
@@ -104,14 +100,14 @@ class RT2800USBNetlink:
     # RAW socket functions ---------------------------
     def raw_send(self, data):
         if self.n_debug:
-            print('Bytes sent: ' + binascii.hexlify(data))
+            print(f'Bytes sent: {binascii.hexlify(data)}')
         self.n_socket.send(data)
 
     def raw_receive(self):
         data = self.n_socket.recv(self.NETLINK_BUFFER_SIZE)
         if self.n_debug:
-            print(str(len(data)) + ' bytes received')
-            print("Hex: " + binascii.hexlify(data[::-1]))
+            print(f'{len(data)} bytes received')
+            print(f"Hex: {binascii.hexlify(data[::-1])}")
             print("Int: " + str(struct.unpack("<L", data)[0]))
         return data
 
@@ -132,8 +128,7 @@ class RT2800USBNetlink:
             print('\nREAD command')
         netlink_data = struct.pack('<BL', NETLINK_CMD_READ_ADDR, addr)
         self.raw_send(netlink_data)
-        data = self.raw_receive()  # Get reading
-        return data
+        return self.raw_receive()
 
     def write(self, addr, value, size=0):
         if self.n_debug:
@@ -142,12 +137,12 @@ class RT2800USBNetlink:
             netlink_data = struct.pack('<BLL', NETLINK_CMD_WRITE_ADDR,
                                        addr, value)
         else:
-            netlink_data = struct.pack('<BLB' + str(size) + 's', NETLINK_CMD_MULTIWRITE_ADDR,
-                                       addr, size, value)  # value here is in bytes
+            netlink_data = struct.pack(
+                f'<BLB{str(size)}s', NETLINK_CMD_MULTIWRITE_ADDR, addr, size, value
+            )
 
         self.raw_send(netlink_data)
-        data = self.raw_receive()  # Get status
-        return data
+        return self.raw_receive()
 
     def send_data(self, data):
         netlink_data = chr(NETLINK_CMD_SEND_DATA) + \
@@ -156,22 +151,21 @@ class RT2800USBNetlink:
 
     def set_mac(self, mac):
         netlink_data = ''.join((mac.split(':'))).decode('hex')
-        data = self.write(MAC_ADDR_DW0, netlink_data, size=6)
-        return data
+        return self.write(MAC_ADDR_DW0, netlink_data, size=6)
 
     def set_flags_enable(self, value):
         netlink_data = struct.pack(
             '<BB', NETLINK_CMD_FORCE_FLAGS_ENABLE, value)
         self.raw_send(netlink_data)
         if self.n_debug:
-            print('force flags set to ' + str(value))
+            print(f'force flags set to {str(value)}')
         return self.raw_receive()
 
     def set_flags_retry(self, value):
         netlink_data = struct.pack('<BB', NETLINK_CMD_FORCE_FLAGS_RETRY, value)
         self.raw_send(netlink_data)
         if self.n_debug:
-            print('retry flags set to ' + str(value))
+            print(f'retry flags set to {str(value)}')
         return self.raw_receive()
 
     def set_filter(self, value):
@@ -206,7 +200,7 @@ class RT2800USBNetlink:
                                    NETLINK_CMD_INTERCEPTION_TX_ENABLE, value)
         self.raw_send(netlink_data)
         if self.n_debug:
-            print('TX Interception set to ' + str(value))
+            print(f'TX Interception set to {str(value)}')
         return self.raw_receive()
 
     def set_interrupt_rx_disable(self):
@@ -238,8 +232,8 @@ RT2800.set_interrupt_rx_enable()
 # RT2800.read(RX_FILTER_CFG)
 wdissector_init("encap:IEEE802_11_RADIO")
 
-print("Version: " + wdissector_version_info().decode())
-print("Loaded Profile: " + wdissector_profile_info().decode())
+print(f"Version: {wdissector_version_info().decode()}")
+print(f"Loaded Profile: {wdissector_profile_info().decode()}")
 
 RT2800.n_debug = False
 t = Thread(target=thread_dhcp)
@@ -256,10 +250,6 @@ while True:
     #print(str(len(data)) + " Hex: " + binascii.hexlify(data))
     nl_evt = ord(data[0])
 
-    if nl_evt == NETLINK_EVT_TX:
-        # RT2800.intercept_tx()
-        pass
-
     d = Dot11(data[1:])
     pkt_raw = str(Raw(RadioTap() / d))
     pkt_raw = [ord(x) for x in pkt_raw]
@@ -267,8 +257,14 @@ while True:
     # if Dot11Beacon not in d and Dot11TKIP not in d and Dot11ProbeReq not in d:
     if Dot11Beacon in d:
         print(binascii.hexlify(raw(RadioTap())))
-        print((Fore.CYAN + "TX --> " if nl_evt ==
-               NETLINK_EVT_TX else Fore.GREEN + "RX <-- ") + d.summary())
+        print(
+            (
+                f"{Fore.CYAN}TX --> "
+                if nl_evt == NETLINK_EVT_TX
+                else f"{Fore.GREEN}RX <-- "
+            )
+            + d.summary()
+        )
         pkt = (ctypes.c_ubyte * len(pkt_raw))(*pkt_raw)
         packet_dissect(pkt, len(pkt))
         print(packet_summary().decode())

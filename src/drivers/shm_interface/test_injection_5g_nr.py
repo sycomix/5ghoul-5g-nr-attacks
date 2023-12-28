@@ -17,8 +17,7 @@ test_buf = [0x44, 0x00, 0x03, 0x00, 0xff, 0x10, 0x3f, 0x00,
 
 def new_duplilcate(rlc_len=0, mac_len=0, mac_buf=list()):
     fuzz_duplicate = {'rlc_len':rlc_len, 'mac_len': mac_len, 'mac_buf':mac_buf}
-    sjson_duplicate = json.dumps(fuzz_duplicate)
-    return sjson_duplicate
+    return json.dumps(fuzz_duplicate)
 
 
 ## request thread

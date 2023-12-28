@@ -44,12 +44,12 @@ print(f'\n{Fore.BLACK}{Back.WHITE}<============> 1) Example with BLE Packets <==
 
 pkts = rdpcap("captures/capture_dialog_DA14680_truncated_l2cap_crash.pcap")
 
-interesting_pkts = []
-interesting_pkts.append((WD_DIR_TX, pkts[58]))
-interesting_pkts.append((WD_DIR_RX, pkts[60]))
-interesting_pkts.append((WD_DIR_TX, pkts[64]))
-interesting_pkts.append((WD_DIR_RX, pkts[66]))
-
+interesting_pkts = [
+    (WD_DIR_TX, pkts[58]),
+    (WD_DIR_RX, pkts[60]),
+    (WD_DIR_TX, pkts[64]),
+    (WD_DIR_RX, pkts[66]),
+]
 ret = PktLabelGen.init("configs/ble_config.json", True) # Load State Mapper configuration
 if not ret:
     print("Error initializing packet label generator")
@@ -62,9 +62,7 @@ print(f'\n{Fore.BLACK}{Back.WHITE}<============> 2) Example with 5G NR Packets <
 pkts = rdpcap("captures/capture_5gnr_mtk_crash.pcapng")
 
 interesting_pkts = []
-interesting_pkts.append((WD_DIR_TX, pkts[9])) # Packet number 10 in wireshark capture
-interesting_pkts.append((WD_DIR_TX, pkts[13])) # Packet number 14 in wireshark capture
-
+interesting_pkts.extend(((WD_DIR_TX, pkts[9]), (WD_DIR_TX, pkts[13])))
 ret = PktLabelGen.init("configs/5gnr_gnb_config.json", True) # Load State Mapper configuration
 if not ret:
     print("Error initializing packet label generator")
@@ -74,10 +72,7 @@ if not ret:
 print(f'\n{Fore.BLACK}{Back.WHITE}<============> 3) Example with Bluetooth Classic <============>')
 pkts = rdpcap("captures/capture_bluetooth_iocap_dup.pcapng")
 
-interesting_pkts = []
-interesting_pkts.append((WD_DIR_TX, pkts[8])) # Packet number 10 in wireshark capture
-interesting_pkts.append((WD_DIR_TX, pkts[9])) # Packet number 14 in wireshark capture
-
+interesting_pkts = [(WD_DIR_TX, pkts[8]), (WD_DIR_TX, pkts[9])]
 ret = PktLabelGen.init("configs/bt_config.json", True) # Load State Mapper configuration
 if not ret:
     print("Error initializing packet label generator")
