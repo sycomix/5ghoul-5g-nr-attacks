@@ -17,13 +17,13 @@ colorama.init(autoreset=True)
 # ------------------ Sample Packets ------------------
 pkts = rdpcap("captures/capture_dialog_DA14680_truncated_l2cap_crash.pcap")
 
-interesting_pkts = []
-interesting_pkts.append((WD_DIR_TX, pkts[58]))
-interesting_pkts.append((WD_DIR_RX, pkts[60]))
-interesting_pkts.append((WD_DIR_TX, pkts[64]))
-interesting_pkts.append((WD_DIR_RX, pkts[66]))
-interesting_pkts.append((WD_DIR_TX, pkts[67]))
-
+interesting_pkts = [
+    (WD_DIR_TX, pkts[58]),
+    (WD_DIR_RX, pkts[60]),
+    (WD_DIR_TX, pkts[64]),
+    (WD_DIR_RX, pkts[66]),
+    (WD_DIR_TX, pkts[67]),
+]
 # ------------------ WDissector Initialization ------------------
 print('\n---------------------- WDissector -----------------------')
 # Initialize protocol
@@ -77,7 +77,7 @@ for dir, pkt in interesting_pkts:
     print(
         f'Packet Layers: {wd_packet_layers_count(wd) - 1} ({wd_packet_dissectors(wd)})')
     color = Fore.GREEN if filter_result else Fore.RED
-    
+
     # check if L2CAP opcode field exists
     if opcode_l2cap:
         value = packet_read_field_uint64(opcode_l2cap)
@@ -92,7 +92,7 @@ for dir, pkt in interesting_pkts:
     # Check filter condition only for l2cap packets
     if not opcode_ll:
         print(f'{color}--> Condition Result: {filter_result} (\'{filter_string}\')')
-    
+
     dir_str = "TX" if dir == WD_DIR_TX else "RX"
     layer_str = "L2CAP" if opcode_l2cap else "LL Ctrl"
     state_label = f'{dir_str} / {layer_str} / {opcode_text}'

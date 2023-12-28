@@ -18,14 +18,15 @@ def TestSocketIORequest(logger, server_address, server_port, event_name, test_da
     sio = socketio.Client()
 
     if test_data:
-        logger('Data: ' + test_data)
+        logger(f'Data: {test_data}')
 
     @sio.event
     def connect():
         logger('Connection established')
         # event_name is the socketio event name
-        logger('Requesting event ' + event_name +
-               ' from server ' + server_address + ':' + server_port)
+        logger(
+            f'Requesting event {event_name} from server {server_address}:{server_port}'
+        )
         res = sio.call(event_name, test_data)
         # res is the response message from the server if there is any
         logger(res)
@@ -33,9 +34,9 @@ def TestSocketIORequest(logger, server_address, server_port, event_name, test_da
         logger('Done, disconnecting...')
         sys.exit(0)
 
-    logger(server_address + ':' + server_port)
+    logger(f'{server_address}:{server_port}')
     try:
-        sio.connect(server_address + ':' + server_port, transports='websocket')
+        sio.connect(f'{server_address}:{server_port}', transports='websocket')
     except socketio.exceptions.ConnectionError as err:
         print('Connection error, check if server address/port is correct!')
     try:
@@ -56,14 +57,13 @@ def TestSocketIOSubscription(logger, server_address, server_port, event_name, te
     def connect():
         logger('Connection established')
         logger('Press Ctrl+C to disconnect and exit')
-        logger('Wait event ' + event_name + ' from server ' +
-               server_address + ':' + server_port)
+        logger(f'Wait event {event_name} from server {server_address}:{server_port}')
         # event_name is the socketio event name
         sio.on(event_name, receive_event)
 
-    logger(server_address + ':' + server_port)
+    logger(f'{server_address}:{server_port}')
     try:
-        sio.connect(server_address + ':' + server_port, transports='websocket')
+        sio.connect(f'{server_address}:{server_port}', transports='websocket')
     except socketio.exceptions.ConnectionError as err:
         print('Connection error, check if server address/port is correct!')
     try:
@@ -84,7 +84,7 @@ def ServerTest(argv):
 
     def LogHelper(msg):
         if msg:
-            print(('[%s] ' + str(msg)) % (server_type))
+            print(f'[%s] {str(msg)}' % server_type)
 
     try:
         opts, args = getopt.getopt(
@@ -113,12 +113,11 @@ def ServerTest(argv):
             test_data = arg
         elif opt in ("-a", "--address"):
             if ('ws://' not in arg) and ('http://' not in arg):
-                server_address = 'ws://' + arg
+                server_address = f'ws://{arg}'
             else:
                 server_address = arg
         elif opt in ("-p", "--port"):
             server_port = int(arg)
-            pass
         else:
             print('Arguments error')
 

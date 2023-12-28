@@ -81,7 +81,7 @@ class SocketIOServer(socketio.Namespace):
             def gen_fcn(sid, *args):
                 return fcn(list(args))
 
-        self.__setattr__('on_' + fcn_name, gen_fcn)
+        self.__setattr__(f'on_{fcn_name}', gen_fcn)
 
     def start(self, port, host='0.0.0.0', logging=False):
         if self.running is False:

@@ -17,13 +17,13 @@ colorama.init(autoreset=True)
 # ------------------ Sample Packets ------------------
 pkts = rdpcap("captures/capture_dialog_DA14680_truncated_l2cap_crash.pcap")
 
-interesting_pkts = []
-interesting_pkts.append((WD_DIR_TX, pkts[58]))
-interesting_pkts.append((WD_DIR_RX, pkts[60]))
-interesting_pkts.append((WD_DIR_TX, pkts[64]))
-interesting_pkts.append((WD_DIR_RX, pkts[66]))
-interesting_pkts.append((WD_DIR_TX, pkts[67]))
-
+interesting_pkts = [
+    (WD_DIR_TX, pkts[58]),
+    (WD_DIR_RX, pkts[60]),
+    (WD_DIR_TX, pkts[64]),
+    (WD_DIR_RX, pkts[66]),
+    (WD_DIR_TX, pkts[67]),
+]
 # ------------------ State Machine Initialization ------------------
 print('\n\n--------------------- State Machine ---------------------')
 StateMachine = Machine()
@@ -39,7 +39,7 @@ ret = StateMachine.LoadModel("configs/models/sample_ble_model.json") # Load Stat
 if not ret:
     print("Error loading state machine model")
     exit(1)
-    
+
 print(f'Total States Loaded: {StateMachine.TotalStates()}')
 print(f'Total Transitions Loaded: {StateMachine.TotalTransitions()}')
 
@@ -52,7 +52,7 @@ for dir, pkt in interesting_pkts:
     print(f'{Fore.CYAN}Current State: {StateMachine.GetCurrentStateName()}')
     next_states = StateMachine.GetNextStateNames()
     if len(next_states):
-        print(f'Next Expected States:')
+        print('Next Expected States:')
         for state in next_states:
             print(f'  {state}')
     # 1) Prepare State Mapper
